@@ -1,11 +1,10 @@
-import { readFile } from 'node:fs/promises';
 import {
   AckPolicy,
   connect,
   consumerOpts,
-  credsAuthenticator,
   DeliverPolicy,
   headers,
+  jwtAuthenticator,
   type MsgHdrs,
   type NatsConnection,
   ReplayPolicy,
@@ -18,14 +17,15 @@ export const sc = StringCodec();
 
 export async function getConnection(): Promise<NatsConnection> {
   const servers = process.env.NATS_URL ?? 'nats://localhost:4222';
-  const credsPath = process.env.NATS_CREDS;
+  const jwt = process.env.NATS_USER_JWT;
+  const seed = process.env.NATS_USER_SEED;
 
   const nc = await connect({
     servers,
     name: process.env.HOSTNAME ?? 'demo-client',
     reconnect: true,
     maxReconnectAttempts: -1,
-    ...(credsPath && { authenticator: credsAuthenticator(await readFile(credsPath)) }),
+    ...(jwt && seed && { authenticator: jwtAuthenticator(jwt, new TextEncoder().encode(seed)) }),
   });
 
   (async () => {

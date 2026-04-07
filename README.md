@@ -106,10 +106,11 @@ This creates:
 - **Account** `Agents` — the tenant (your agent mesh)
 - **User** `demo-client` — the identity used by all demo services
 
-Copy the generated resolver config into the project:
+Copy the generated resolver config and credentials into the project:
 
 ```sh
 cp .nsc/resolver.conf ./resolver.conf
+cp .nsc/.env ./.env
 ```
 
 Start the broker, then push account JWTs:
