@@ -22,6 +22,14 @@ Services:
 - `js-publisher` — writes durable messages to JetStream on `tasks.ingest`
 - `js-worker` — pulls from JetStream and acknowledges messages
 
+## Prerequisites
+
+```sh
+brew bundle
+```
+
+This installs the `nats`, `nsc`, and `nk` CLIs locally from the `nats-io/nats-tools` tap. They're optional for the Docker-based workflow but useful for debugging and inspecting a running cluster.
+
 ## Run it
 
 ```sh
