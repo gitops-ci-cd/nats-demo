@@ -1,8 +1,12 @@
+import { readFile } from 'node:fs/promises';
 import {
   AckPolicy,
   connect,
   consumerOpts,
+  credsAuthenticator,
   DeliverPolicy,
+  headers,
+  type MsgHdrs,
   type NatsConnection,
   ReplayPolicy,
   RetentionPolicy,
@@ -14,12 +18,27 @@ export const sc = StringCodec();
 
 export async function getConnection(): Promise<NatsConnection> {
   const servers = process.env.NATS_URL ?? 'nats://localhost:4222';
-  return connect({
+  const credsPath = process.env.NATS_CREDS;
+
+  const nc = await connect({
     servers,
     name: process.env.HOSTNAME ?? 'demo-client',
     reconnect: true,
     maxReconnectAttempts: -1,
+    ...(credsPath && { authenticator: credsAuthenticator(await readFile(credsPath)) }),
   });
+
+  (async () => {
+    for await (const s of nc.status()) {
+      console.log(`[${now()}] nats: ${s.type}`, s.data ?? '');
+    }
+  })();
+
+  nc.closed().then((err) => {
+    console.log(`[${now()}] nats: connection closed`, err ?? '');
+  });
+
+  return nc;
 }
 
 export async function ensureStream(nc: NatsConnection) {
@@ -70,4 +89,15 @@ export function makePullConsumerOptions(durable: string) {
   opts.manualAck();
   opts.ackExplicit();
   return opts;
+}
+
+export function traceHeaders(source: string, inbound?: MsgHdrs): MsgHdrs {
+  const h = headers();
+  h.set('trace-id', inbound?.get('trace-id') || crypto.randomUUID());
+  h.set('source', source);
+  return h;
+}
+
+export function traceId(h?: MsgHdrs): string {
+  return h?.get('trace-id') || 'unknown';
 }

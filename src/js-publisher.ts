@@ -1,4 +1,4 @@
-import { ensureStream, getConnection, now, sc, sleep } from './lib.js';
+import { ensureStream, getConnection, now, sc, sleep, traceHeaders } from './lib.js';
 
 async function main() {
   const nc = await getConnection();
@@ -19,8 +19,8 @@ async function main() {
       at: now(),
     };
 
-    const ack = await js.publish('tasks.ingest', sc.encode(JSON.stringify(payload)));
-    console.log(`[${now()}] js-publisher stored tasks.ingest seq=${payload.seq} streamSeq=${ack.seq}`);
+    const ack = await js.publish('tasks.ingest', sc.encode(JSON.stringify(payload)), { headers: traceHeaders('js-publisher') });
+    console.log(`[${now()}] js-publisher stored tasks.ingest seq=${payload.seq} streamSeq=${ack.seq} id=${payload.id}`);
     await sleep(3000);
   }
 }

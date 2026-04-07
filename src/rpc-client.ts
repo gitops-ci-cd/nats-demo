@@ -1,4 +1,4 @@
-import { getConnection, now, sc, sleep } from './lib.js';
+import { getConnection, now, sc, sleep, traceHeaders, traceId } from './lib.js';
 
 interface EchoResponse {
   handledBy: string;
@@ -18,12 +18,14 @@ async function main() {
       at: now(),
     };
 
+    const h = traceHeaders('rpc-client');
     const res = await nc.request('agent.echo', sc.encode(JSON.stringify(payload)), {
       timeout: 2000,
+      headers: h,
     });
 
     const body = res.json<EchoResponse>();
-    console.log(`[${now()}] rpc-client got response handledBy=${body.handledBy} traceId=${body.request.traceId}`);
+    console.log(`[${now()}] rpc-client got response trace=${traceId(h)} handledBy=${body.handledBy}`);
 
     await sleep(5000);
   }

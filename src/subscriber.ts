@@ -1,4 +1,4 @@
-import { getConnection, now } from './lib.js';
+import { getConnection, now, traceId } from './lib.js';
 
 interface OrderEvent {
   seq: number;
@@ -15,7 +15,7 @@ async function main() {
   for await (const msg of sub) {
     const data = msg.json<OrderEvent>();
     console.log(
-      `[${now()}] subscriber received subject=${msg.subject} seq=${data.seq} orderId=${data.orderId} total=${data.total}`,
+      `[${now()}] subscriber received subject=${msg.subject} trace=${traceId(msg.headers)} seq=${data.seq} orderId=${data.orderId} total=${data.total}`,
     );
   }
 }

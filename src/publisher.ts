@@ -1,4 +1,4 @@
-import { getConnection, now, sc, sleep } from './lib.js';
+import { getConnection, now, sc, sleep, traceHeaders } from './lib.js';
 
 async function main() {
   const nc = await getConnection();
@@ -17,8 +17,8 @@ async function main() {
       at: now(),
     };
 
-    nc.publish('orders.created', sc.encode(JSON.stringify(payload)));
-    console.log(`[${now()}] published orders.created seq=${payload.seq}`);
+    nc.publish('orders.created', sc.encode(JSON.stringify(payload)), { headers: traceHeaders('publisher') });
+    console.log(`[${now()}] published orders.created seq=${payload.seq} id=${payload.id}`);
     await sleep(2000);
   }
 }

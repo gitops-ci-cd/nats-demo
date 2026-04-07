@@ -1,4 +1,4 @@
-import { ensureConsumer, ensureStream, getConnection, now, sleep } from './lib.js';
+import { ensureConsumer, ensureStream, getConnection, now, sleep, traceId } from './lib.js';
 
 interface TaskMessage {
   seq: number;
@@ -22,10 +22,10 @@ async function main() {
     for await (const msg of messages) {
       gotAny = true;
       const data = msg.json<TaskMessage>();
-      console.log(`[${now()}] js-worker processing subject=${msg.subject} seq=${data.seq} docId=${data.docId}`);
+      console.log(`[${now()}] js-worker processing subject=${msg.subject} trace=${traceId(msg.headers)} seq=${data.seq} docId=${data.docId}`);
       await sleep(750);
       msg.ack();
-      console.log(`[${now()}] js-worker acked seq=${data.seq}`);
+      console.log(`[${now()}] js-worker acked trace=${traceId(msg.headers)} seq=${data.seq}`);
     }
 
     if (!gotAny) {

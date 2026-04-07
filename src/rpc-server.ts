@@ -1,4 +1,4 @@
-import { getConnection, now, sc } from './lib.js';
+import { getConnection, now, sc, traceHeaders, traceId } from './lib.js';
 
 interface EchoRequest {
   traceId: string;
@@ -19,8 +19,8 @@ async function main() {
       request,
     };
 
-    msg.respond(sc.encode(JSON.stringify(response)));
-    console.log(`[${now()}] rpc-server handled request traceId=${request.traceId}`);
+    msg.respond(sc.encode(JSON.stringify(response)), { headers: traceHeaders('rpc-server', msg.headers) });
+    console.log(`[${now()}] rpc-server handled request trace=${traceId(msg.headers)}`);
   }
 }
 

@@ -15,15 +15,40 @@ services:
       - .:/usr/src/app:delegated
       - node_modules:/usr/src/app/node_modules:cached
 
+  nk:
+    profiles: [tasks]
+    image: natsio/nats-box:latest
+    tty: true
+    stdin_open: true
+    entrypoint: nk
+    command: --help
+
+  nsc:
+    profiles: [tasks]
+    image: natsio/nats-box:latest
+    tty: true
+    stdin_open: true
+    entrypoint: nsc
+    command: --help
+    environment:
+      NSC_HOME: /nsc
+      NKEYS_PATH: /nsc/nkeys
+    volumes:
+      - ./.nsc:/nsc
+      - ./scripts:/scripts:ro
+
   nats:
     profiles: [tasks]
-    image: nats:2
+    image: natsio/nats-box:latest
     tty: true
     stdin_open: true
     entrypoint: nats
     command: --help
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
 
   broker:
     image: nats:2
@@ -37,6 +62,8 @@ services:
     volumes:
       - nats_data:/data
       - ./nats.conf:/etc/nats/nats.conf:ro
+      - ./resolver.conf:/etc/nats/resolver.conf:ro
+      - nats_jwt:/jwt
 
   publisher:
     build: .
@@ -44,6 +71,9 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "publisher"]
 
   subscriber:
@@ -52,6 +82,9 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "subscriber"]
 
   rpc-server:
@@ -60,6 +93,9 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "rpc-server"]
 
   rpc-client:
@@ -68,6 +104,9 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "rpc-client"]
 
   js-publisher:
@@ -76,6 +115,9 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "js-publisher"]
 
   js-worker:
@@ -84,8 +126,12 @@ services:
       - broker
     environment:
       NATS_URL: nats://broker:4222
+      NATS_CREDS: /nsc/nkeys/creds/Demo/Agents/demo-client.creds
+    volumes:
+      - ./.nsc:/nsc:ro
     command: ["npm", "run", "js-worker"]
 
 volumes:
   nats_data:
+  nats_jwt:
   node_modules:
