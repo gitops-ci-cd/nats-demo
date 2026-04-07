@@ -1,0 +1,25 @@
+{
+  "name": "nats-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "npx @biomejs/biome check src",
+    "lint:fix": "npx @biomejs/biome check --write src",
+    "publisher": "tsx src/publisher.ts",
+    "subscriber": "tsx src/subscriber.ts",
+    "rpc-server": "tsx src/rpc-server.ts",
+    "rpc-client": "tsx src/rpc-client.ts",
+    "js-publisher": "tsx src/js-publisher.ts",
+    "js-worker": "tsx src/js-worker.ts"
+  },
+  "dependencies": {
+    "nats": "^2.29.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.6",
+    "@types/node": "^24.12.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.3"
+  }
+}
