@@ -1,6 +1,8 @@
 # NATS Demo
 
-A small demo you can run locally with Docker Compose to play with:
+[NATS](https://docs.nats.io/nats-concepts/overview) is a lightweight, high-performance messaging system for distributed applications. It handles pub/sub, request/reply, and persistent streaming (JetStream) with minimal operational overhead.
+
+This demo runs locally with Docker Compose so you can play with:
 
 - core NATS pub/sub
 - request/reply
