@@ -128,7 +128,46 @@ dr nsc add user another-agent --account Agents
 dr nsc push -A -u nats://broker:4222
 ```
 
-No broker restart needed — JWTs are resolved dynamically.
+No broker restart needed — account JWTs are resolved dynamically.
+
+### Credential distribution
+
+Each connecting client needs two things: its **user JWT** (identity) and **user seed** (private key). In this demo they live in `.env`, but in production you'd store them in Vault or a similar secrets manager.
+
+To extract credentials for a new user:
+
+```sh
+# view the creds file
+dr nsc describe user another-agent --account Agents --raw
+
+# or extract JWT and seed separately
+dr nsc describe user another-agent --account Agents --field sub   # user public key
+cat .nsc/nkeys/creds/Demo/Agents/another-agent.creds              # JWT + seed
+```
+
+| Secret | Sensitivity | Where to store |
+| -------- | ------------- | ---------------- |
+| User JWT | Low — signed, not usable alone | Vault, env var, config map |
+| User Seed | **High** — proves identity | Vault only |
+| Account JWT | None for clients | Pushed to broker via `nsc push` |
+| Operator keys | **Critical** | Offline / HSM |
+
+### Key hierarchy
+
+`nsc` stores all keys under `.nsc/nkeys/keys/`, organized by type prefix:
+
+```sh
+.nsc/nkeys/keys/
+├── O/   # Operator seeds — root of trust
+├── A/   # Account seeds — sign user JWTs
+└── U/   # User seeds — prove client identity
+```
+
+Each `.nk` file contains the seed (private key) for that entity. The file is named by public key.
+
+**In production**, the operator seed should be extracted and moved offline (or to an HSM) after initial setup. You only need it to sign new _account_ JWTs — a rare operation. Day-to-day tasks like adding users only require the account seed. This means a compromised account key can't mint new accounts or alter the operator, limiting blast radius.
+
+For this demo, everything stays in `.nsc/` for convenience. The entire directory is gitignored.
 
 ## Notes
 
