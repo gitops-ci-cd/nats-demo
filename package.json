@@ -11,7 +11,8 @@
     "rpc-server": "tsx src/rpc-server.ts",
     "rpc-client": "tsx src/rpc-client.ts",
     "js-publisher": "tsx src/js-publisher.ts",
-    "js-worker": "tsx src/js-worker.ts"
+    "js-worker": "tsx src/js-worker.ts",
+    "echo-agent": "tsx src/echo-agent.ts"
   },
   "dependencies": {
     "nats": "^2.29.3"
